@@ -1,0 +1,1 @@
+{"settings": {"rows_per_page": 10, "max_rows": 10000}, "columns": {"string": {"data_type": "str", "max_length": 10000}, "id": {"data_type": "str", "max_length": 10000}, "all": {"data_type": "str", "max_length": 10000}}}
