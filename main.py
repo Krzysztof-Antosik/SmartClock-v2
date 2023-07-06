@@ -191,20 +191,39 @@ def removeAccets(str):
         str = str.replace(specialChars[i], normalChars[i])
     return str
 
+def monthLastWday(year, month, day):
+    a = (14 - month) // 12
+    y = year - a
+    m = month + 12 * a - 2
+
+    wday = (day + y + y // 4 - y // 100 + y // 400 + (31 * m) // 12) % 7
+    
+    if wday == 0:
+        wday = 7
+        
+    return wday
+
+def lastSunday(year, month):
+    return True
+    
+
 #check dying saving time
-def is_daylight_saving_time(year, month, day, wday, hour, minute):
+def daylightSavingTime(year, month, day, wday, hour, minute):
     # Check if the month is March (3) or October (10)
     if month < 3 or month > 10:
         return False
     if month >= 3 and month <= 10:
         # Get the last Sunday in March and October
-        last_sunday_march = 31 - ((5 * year // 4 + 4) % 7)
-        last_sunday_october = 31 - ((5 * year // 4 + 1) % 7)
+        lastSundayMarch = 31 - monthLastWday(year, 3, 31)
+
+        lastSundayOctober = 31 - monthLastWday(year, 10, 31)
+        
+        print("march: ", 31 - monthLastWday(2026, 3, 31))
 
         if month == 3:
-            if day > last_sunday_march:
+            if day > lastSundayMarch:
                 return True
-            elif day == last_sunday_march:
+            elif day == lastSundayMarch:
                 if hour >= 2:
                     return True
                 else:
@@ -213,9 +232,9 @@ def is_daylight_saving_time(year, month, day, wday, hour, minute):
                 return False
            
         elif month == 10:
-            if day < last_sunday_october:
+            if day < lastSundayOctober:
                 return True
-            elif day == last_sunday_october:
+            elif day == lastSundayOctober:
                 if hour >= 2:
                     return True
                 else:
@@ -250,7 +269,7 @@ def showTime():
         offset = 1
         hour += offset
         
-        hour += 1 if is_daylight_saving_time(year, month, day, wday, hour, minute) else 0
+        hour += 1 if daylightSavingTime(year, month, day, wday, hour, minute) else 0
         
         hour = 00 if hour == 24 else hour
         hour = 01 if hour == 25 else hour
