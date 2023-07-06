@@ -5,7 +5,7 @@ from ntptime import settime
 from re import search
 from pages import *
 from ahtx0 import AHT10
-import network, random, _thread, micropydatabase, max7219
+import network, random, _thread, micropydatabase, max7219, os
 
 try:
     import usocket as socket
@@ -127,7 +127,7 @@ def connect():
                 disconnect()
                 return False
         else:
-            print("Device is arledy connected")
+            print("Device is already connected")
         
     except OSError as e:
         print("Error C: ", e)
@@ -191,13 +191,45 @@ def removeAccets(str):
         str = str.replace(specialChars[i], normalChars[i])
     return str
 
+#check dying saving time
+def is_daylight_saving_time(year, month, day, wday, hour, minute):
+    # Check if the month is March (3) or October (10)
+    if month < 3 or month > 10:
+        return False
+    if month >= 3 and month <= 10:
+        # Get the last Sunday in March and October
+        last_sunday_march = 31 - ((5 * year // 4 + 4) % 7)
+        last_sunday_october = 31 - ((5 * year // 4 + 1) % 7)
+
+        if month == 3:
+            if day > last_sunday_march:
+                return True
+            elif day == last_sunday_march:
+                if hour >= 2:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+           
+        elif month == 10:
+            if day < last_sunday_october:
+                return True
+            elif day == last_sunday_october:
+                if hour >= 2:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return True
+
 #init timer and show time
 def showTime():
     global rtc, photoresistor, t_strings, timezone, settings
     
     settings = t_settings.find({"all": 1})
-    
-    
     
     if settings["display"] == 'on':
         
@@ -206,14 +238,25 @@ def showTime():
         brightness = ((lightLevel - 0) / (4095 - 0)) * (7 - 0) + 0  
         display.brightness(round(brightness))
         
-        #show time
-        timezone = settings["timezone"]
-        print(timezone)
+        #show time     
+        year = rtc.datetime()[0]
+        month = rtc.datetime()[1]
+        day = rtc.datetime()[2]
+        wday = rtc.datetime()[3]
         hour = rtc.datetime()[4]
         minute = rtc.datetime()[5]
         second = rtc.datetime()[6]
         
-        currentTime = "%02d:%02d:%02d" % (hour + timezone, minute, second)
+        offset = 1
+        hour += offset
+        
+        hour += 1 if is_daylight_saving_time(year, month, day, wday, hour, minute) else 0
+        
+        hour = 00 if hour == 24 else hour
+        hour = 01 if hour == 25 else hour
+        hour = 02 if hour == 26 else hour
+        
+        currentTime = "%02d:%02d:%02d" % (hour, minute, second)
         
         print_d(currentTime)
         
@@ -391,15 +434,6 @@ while True:
                                         <a href="/displayon">
                                             <button>Turn on</button>
                                         </a>''')
-        if settings['timezone'] == 1:
-             trySend('''
-                                        <a href="timezonetwo">
-                                            <button>Switch daylight time to summer</button>
-                                        </a>''')
-        else:                            
-            trySend('''                 <a href="timezoneone">
-                                            <button>Switch daylight time to winter</button>
-                                        </a>''')
         trySend('''
                                     </td>
                                 </tr>
@@ -487,22 +521,6 @@ while True:
         
         trySend(headerPage())
         trySend(displayOnPage())
-        trySend(footerPage("/settings"))
-        
-    elif page == "/timezonetwo":
-        settings = t_settings.find({"all": 1})
-        t_settings.update(settings, {'display': settings['display'], 'sta_ssid': settings['sta_ssid'], 'sta_pw': settings['sta_pw'], 'ap_pw': settings['ap_pw'], 'all': settings['all'], 'ap_ssid': settings['ap_ssid'], 'version': settings['version'], 'timezone': 2})
-        
-        trySend(headerPage())
-        trySend(timezoneSwitchPage())
-        trySend(footerPage("/settings"))
-        
-    elif page == "/timezoneone":
-        settings = t_settings.find({"all": 1})
-        t_settings.update(settings, {'display': settings['display'], 'sta_ssid': settings['sta_ssid'], 'sta_pw': settings['sta_pw'], 'ap_pw': settings['ap_pw'], 'all': settings['all'], 'ap_ssid': settings['ap_ssid'], 'version': settings['version'], 'timezone': 1})
-        
-        trySend(headerPage())
-        trySend(timezoneSwitchPage())
         trySend(footerPage("/settings"))
 
     startTime()

@@ -1,9 +1,11 @@
-import micropydatabase
+import micropydatabase, os
 
 database = micropydatabase.Database.open("database")
+
 t_strings = database.open_table("strings")
 t_count = database.open_table("count")
 t_settings = database.open_table("settings")
+t_time = database.open_table("time")
 
 def addCount():
     last = t_count.find({"all": 1})

@@ -1,1 +1,1 @@
-{"d": {"timezone": 2, "sta_ssid": "UPCA65394D", "display": "on", "sta_pw": "vpudeXbsjtu6", "ap_pw": "", "all": 1, "ap_ssid": "SmartClock v2", "version": 2.2}, "r": 1}
+{"r": 1, "d": {"ap_ssid": "SmartClock v2", "sta_ssid": "UPCA65394D", "version": 2.3, "sta_pw": "vpudeXbsjtu6", "ap_pw": "", "all": 1, "timezone": 2, "display": "on"}}
