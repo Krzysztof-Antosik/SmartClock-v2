@@ -231,9 +231,9 @@ def daylightSavingTime(year, month, day, wday, hour, minute):
                 return True
             elif day == lastSundayOctober:
                 if hour >= 2:
-                    return True
-                else:
                     return False
+                else:
+                    return True
             else:
                 return False
         else:
